@@ -13,6 +13,7 @@ repositories {
 }
 
 dependencies {
+	implementation(kotlin("test-junit5"))
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 }
