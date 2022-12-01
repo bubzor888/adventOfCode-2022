@@ -12,6 +12,8 @@ fun main() {
 
     assertEquals(0, execute(test1))
 
+//    assertEquals(0, execute2(test1))
+
     println("Tests passed, attempting input")
 
     val input = File("$path\\src\\main\\kotlin\\{{day}}\\input.txt").readLines()
