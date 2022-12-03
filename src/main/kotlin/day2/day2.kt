@@ -63,17 +63,17 @@ private fun findPlay(them: String, result: String): String {
 
 private fun execute(input: List<String>): Int {
     val pattern = """(\w) (\w)""".toRegex()
-    return input.map {
+    return input.sumOf {
         val (them, me) = pattern.matchEntire(it)!!.destructured
         scoreGame(them, me) + scorePlay(me)
-    }.fold(0) { sum, element -> sum + element }
+    }
 }
 
 private fun execute2(input: List<String>): Int {
     val pattern = """(\w) (\w)""".toRegex()
-    return input.map {
+    return input.sumOf {
         val (them, result) = pattern.matchEntire(it)!!.destructured
         val me = findPlay(them, result)
         scoreGame(them, me) + scorePlay(me)
-    }.fold(0) { sum, element -> sum + element }
+    }
 }
