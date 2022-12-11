@@ -11,8 +11,8 @@ fun main() {
 //    val test1 = listOf("")
     val test1 = File("$path\\src\\main\\kotlin\\day9\\testInput.txt").readLines()
 
-//    assertEquals(13, execute(test1))
-//    assertEquals(1, execute2(test1))
+    assertEquals(13, execute(test1))
+    assertEquals(1, execute2(test1))
 
     val test2 = File("$path\\src\\main\\kotlin\\day9\\testInput2.txt").readLines()
 
@@ -71,11 +71,23 @@ private fun execute(input: List<String>): Int {
 }
 
 private fun moveKnot(point1: Pair<Int, Int>, point2: Pair<Int, Int>): Pair<Int, Int> {
-    return when {
-        abs(point1.first - point2.first) > 1 -> Pair(point1.first-1, point2.second)
-        abs(point2.first - point1.first) > 1 -> Pair(point1.first+1, point2.second)
-        abs(point1.second - point2.second) > 1 -> Pair(point2.first, point1.second-1)
-        abs(point2.second - point1.second) > 1 -> Pair(point2.first, point1.second+1)
+    return when (point1) {
+        Pair(point2.first+2, point2.second) -> Pair(point2.first+1, point2.second)
+        Pair(point2.first-2, point2.second) -> Pair(point2.first-1, point2.second)
+        Pair(point2.first, point2.second+2) -> Pair(point2.first, point2.second+1)
+        Pair(point2.first, point2.second-2) -> Pair(point2.first, point2.second-1)
+        Pair(point2.first+2, point2.second+1) -> Pair(point2.first+1, point2.second+1)
+        Pair(point2.first+2, point2.second-1) -> Pair(point2.first+1, point2.second-1)
+        Pair(point2.first-2, point2.second+1) -> Pair(point2.first-1, point2.second+1)
+        Pair(point2.first-2, point2.second-1) -> Pair(point2.first-1, point2.second-1)
+        Pair(point2.first+1, point2.second+2) -> Pair(point2.first+1, point2.second+1)
+        Pair(point2.first-1, point2.second+2) -> Pair(point2.first-1, point2.second+1)
+        Pair(point2.first+1, point2.second-2) -> Pair(point2.first+1, point2.second-1)
+        Pair(point2.first-1, point2.second-2) -> Pair(point2.first-1, point2.second-1)
+        Pair(point2.first+2, point2.second+2) -> Pair(point2.first+1, point2.second+1)
+        Pair(point2.first+2, point2.second-2) -> Pair(point2.first+1, point2.second-1)
+        Pair(point2.first-2, point2.second+2) -> Pair(point2.first-1, point2.second+1)
+        Pair(point2.first-2, point2.second-2) -> Pair(point2.first-1, point2.second-1)
         else -> point2
     }
 }
@@ -83,7 +95,6 @@ private fun moveKnot(point1: Pair<Int, Int>, point2: Pair<Int, Int>): Pair<Int, 
 private fun execute2(input: List<String>): Int {
     //rope[0] will be head, rope[9] will be tail
     val rope = mutableListOf<Pair<Int, Int>>()
-    var prevRope: MutableList<Pair<Int, Int>>
     for (i in 0 until 10) {
         rope.add(Pair(0,0))
     }
@@ -92,7 +103,6 @@ private fun execute2(input: List<String>): Int {
     input.forEach {command ->
         val (dir, amount) = command.split(" ")
         for (i in 0 until amount.toInt()) {
-            prevRope = rope.toMutableList()
             when (dir) {
                 "R" -> {
                     rope[0] = Pair(rope[0].first + 1, rope[0].second)
@@ -120,61 +130,10 @@ private fun execute2(input: List<String>): Int {
                 }
             }
             tailPositions.add(rope[9])
-//            println("$rope")
         }
-        printRope(rope)
     }
 
 
 
     return tailPositions.size
-}
-
-private fun printRope(rope: List<Pair<Int, Int>>) {
-    val output = mutableMapOf<Pair<Int, Int>, Char>()
-    var minX = -5
-    var maxX = 5
-    var minY = -5
-    var maxY = 5
-    rope.forEachIndexed { i, it ->
-        if (i == 0) {
-            output[it] = 'H'
-        } else {
-            output.putIfAbsent(it, i.toString().first())
-        }
-        if (it.first < minX) minX = it.first
-        if (it.first > maxX) maxX = it.first
-        if (it.second < minY) minY = it.second
-        if (it.second > maxY) maxY = it.second
-    }
-
-    for (y in maxY downTo minY) {
-        for (x in minX..maxX) {
-            print(output.getOrDefault(Pair(x,y), '.'))
-        }
-        println()
-    }
-    println()
-}
-
-private fun printTails(tails: List<Pair<Int, Int>>) {
-    val output = mutableMapOf<Pair<Int, Int>, Char>()
-    var minX = 0
-    var maxX = 0
-    var minY = 0
-    var maxY = 0
-    tails.forEach {
-        output[it] = '#'
-        if (it.first < minX) minX = it.first
-        if (it.first > maxX) maxX = it.first
-        if (it.second < minY) minY = it.second
-        if (it.second > maxY) maxY = it.second
-    }
-
-    for (y in maxY downTo minY) {
-        for (x in minX..maxX) {
-            print(output.getOrDefault(Pair(x,y), '.'))
-        }
-        println()
-    }
 }
