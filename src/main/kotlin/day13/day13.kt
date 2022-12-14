@@ -27,13 +27,13 @@ private fun compareValues(left: JsonElement?, right: JsonElement?): Int {
     //Return 1 for valid, -1 for invalid, and 0 for need to compare next
     return when {
         left == null && right == null -> 0
-        left == null -> 1
-        right == null -> -1
+        left == null -> -1
+        right == null -> 1
         left is JsonPrimitive && right is JsonPrimitive -> {
             //Both integers, compare
             when {
-                left.int < right.int -> 1
-                left.int > right.int -> -1
+                left.int < right.int -> -1
+                left.int > right.int -> 1
                 else -> 0
             }
         }
@@ -47,8 +47,8 @@ private fun compareValues(left: JsonElement?, right: JsonElement?): Int {
 
             if (result == 0) {
                 result = when {
-                    left.size < right.size -> 1
-                    left.size > right.size -> -1
+                    left.size < right.size -> -1
+                    left.size > right.size -> 1
                     else -> 0
                 }
             }
@@ -69,12 +69,11 @@ private fun execute(input: List<String>): Int {
         //Skip first blank line
         iterator.next()
         val result = compareValues(Json.parseToJsonElement(iterator.next()), Json.parseToJsonElement(iterator.next()))
-        if (result == 1) {
+        if (result == -1) {
             correctIndexes.add(index)
         }
         index++
     }
-//    println(compareValues(Json.parseToJsonElement("[[4,4],4,4]"), Json.parseToJsonElement("[[4,4],4,4,4]")))
 
     return correctIndexes.sum()
 }
@@ -87,7 +86,7 @@ private fun execute2(input: List<String>): Int {
     rawData.add("[[6]]")
 
     val packets = rawData.map { Json.parseToJsonElement(it) }.sortedWith { left, right ->
-        -1 * compareValues(
+        compareValues(
             left,
             right
         )
