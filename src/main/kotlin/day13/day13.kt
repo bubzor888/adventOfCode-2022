@@ -24,7 +24,7 @@ fun main() {
 }
 
 private fun compareValues(left: JsonElement?, right: JsonElement?): Int {
-    //Return 1 for valid, -1 for invalid, and 0 for need to compare next
+    //Return -1 for valid, 1 for invalid, and 0 for need to compare next
     return when {
         left == null && right == null -> 0
         left == null -> -1

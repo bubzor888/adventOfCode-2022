@@ -38,7 +38,8 @@ private class Monkey(val items: MutableList<Long>, val test: Long, val trueMonke
         }
     }
 
-    fun calcNewWorry2(): Long {
+    fun calcNewWorry2(lcm: Long): Long {
+        //Use least common multiple, as it maintains modulo
         itemsInspected++
         val old = items.removeFirst()
         val change = when (worryChange) {
@@ -46,8 +47,8 @@ private class Monkey(val items: MutableList<Long>, val test: Long, val trueMonke
             else -> worryChange.toLong()
         }
         return when (worryOp) {
-            "+" -> (old + change)
-            else -> (old * change)
+            "+" -> (old + change) % lcm
+            else -> (old * change) % lcm
         }
     }
 
@@ -97,10 +98,13 @@ private fun execute(input: List<String>): Long {
 private fun execute2(input: List<String>): Long {
     val monkeys = initialize(input)
 
+    //Find least common multiple
+    var lcm = monkeys.map { it.test }.fold(1L) { lcm, test -> lcm * test }
+
     for (round in 1..10000) {
         for (monkey in monkeys.indices) {
             while(monkeys[monkey].items.isNotEmpty()) {
-                val newWorry = monkeys[monkey].calcNewWorry2()
+                val newWorry = monkeys[monkey].calcNewWorry2(lcm)
                 val newMonkey = monkeys[monkey].passItem(newWorry)
                 monkeys[newMonkey].items.add(newWorry)
             }
