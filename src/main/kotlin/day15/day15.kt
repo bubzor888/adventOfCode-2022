@@ -13,14 +13,14 @@ fun main() {
     val test1 = File("$path\\src\\main\\kotlin\\day15\\testInput.txt").readLines()
 
     assertEquals(26, execute(test1, 10))
-//    assertEquals(56000011, execute2(test1, 20))
+    assertEquals(56000011, execute2(test1, 20))
 
     println("Tests passed, attempting input")
 
     val input = File("$path\\src\\main\\kotlin\\day15\\input.txt").readLines()
     //Alternative to read whole file, use .readText()
 
-//    println("Final Result 1: ${execute(input, 2000000)}")
+    println("Final Result 1: ${execute(input, 2000000)}")
     println("Final Result 2: ${execute2(input, 4000000)}")
 }
 
@@ -62,8 +62,6 @@ private fun execute(input: List<String>, y: Long): Int {
 
     //Now figure out blocked positions on given row
     var blockedCount = 0
-    println(" minX: $minX manX: $maxX")
-    println(" minY: $minY maxY: $maxY")
     for (x in minX..maxX) {
         val pos = Pair(x,y)
         if (pos !in sensors.keys && pos !in sensors.values) {
@@ -81,76 +79,43 @@ private fun execute(input: List<String>, y: Long): Int {
 }
 
 private fun execute2(input: List<String>, xyMax: Long): Long {
-    val sensors = input.map {
+    val sensors = input.associate {
         val (sX, sY, bX, bY) = pattern.matchEntire(it)!!.destructured.toList().map { v -> v.toLong() }
-        Pair(Pair(sX, sY), Pair(bX, bY))
-    }.sortedWith (
-        compareBy<Pair<Pair<Long, Long>, Pair<Long, Long>>> {
-            //Sort by sensor X first
-            it.first.first
-        }.thenBy {
-            //Then by sensor Y second
-            it.first.second
-        }
-    )
-
-//    val rows = mutableMapOf<Long, MutableSet<LongRange>>()
-//    for (y in 0..xyMax) {
-//        rows[y] = mutableSetOf(0..xyMax)
-//    }
-//    for (sensor in sensors) {
-//        val distance = distance2D(sensor.key, sensor.value)
-//        var xWidth = 0
-//        var change = 1
-//        for (y in sensor.key.second - distance..sensor.key.second + distance) {
-//            val row = rows[y]
-//            if (row != null) {
-//                val range = row.find { it.contains(y) }
-//                row.remove(range)
-//                val xRange = y-xWidth..y+xWidth
-//                row.subtract(xRange)
-//                row.add(range.first)
-//            }
-//            xWidth += change
-//            if (y == sensor.key.second) {
-//                change = -1
-//            }
-//        }
-//    }
-    //Find the largest distance of a sensor
-    var maxDistance = 0L
-    for (sensor in sensors) {
-        val distance = distance2D(sensor.first, sensor.second)
-        if (distance > maxDistance) {
-            maxDistance = distance
-        }
+        val sensor = Pair(sX, sY)
+        val beacon = Pair(bX, bY)
+        sensor to distance2D(sensor, beacon)
     }
 
-    var result: Pair<Long, Long>? = null
     for (y in 0..xyMax) {
-        println("Row $y")
-        for (x in 0..xyMax) {
-            val pos = Pair(x, y)
-            var inRange = false
-            for (sensor in sensors) {
-                //Check if
-                if (distance2D(pos, sensor.first) <= distance2D(sensor.first, sensor.second)) {
-                    inRange = true
-                    break
+        val row = mutableListOf<LongRange>()
+        for (sensor in sensors) {
+            //Check if the y value of the sensor is relevant based on distance
+            val distance = distance1D(y, sensor.key.second)
+            if (distance < sensor.value) {
+                val xSpan = sensor.value - distance
+                var xRange = sensor.key.first-xSpan..sensor.key.first+xSpan
+                if (xRange.last < 0) {
+                    continue
+                } else if (xRange.first < 0) {
+                    xRange = 0..sensor.key.first+xSpan
                 }
+                row.add(xRange)
             }
-            if (!inRange) {
-                result = pos
-                break
+        }
+        //Sort the ranges by starting digit
+        val sorted = row.sortedBy { it.first }
+
+        //Now see if anything is missing
+        var newRange = 0L..0L
+        for (range in sorted) {
+            if (range.first !in newRange) {
+                //Found it
+                return ((range.first-1) * 4000000) + y
+            } else if (range.last > newRange.last) {
+                newRange = newRange.first..range.last
             }
         }
     }
 
-    return if (result == null) {
-        -1
-    } else {
-        println("Result: ${result.first}, ${result.second}")
-        (result.first * 4000000) + result.second
-    }
-//    return 0
+    return 0L
 }
