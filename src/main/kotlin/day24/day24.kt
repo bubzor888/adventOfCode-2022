@@ -11,7 +11,7 @@ fun main() {
     val test1 = File("$path\\src\\main\\kotlin\\day24\\testInput.txt").readLines()
 
     assertEquals(18, execute(test1))
-//    assertEquals(0, execute2(test1))
+    assertEquals(54, execute2(test1))
 
     println("Tests passed, attempting input")
 
@@ -19,7 +19,7 @@ fun main() {
     //Alternative to read whole file, use .readText()
 
     println("Final Result 1: ${execute(input)}")
-//    println("Final Result 2: ${execute2(input)}")
+    println("Final Result 2: ${execute2(input)}")
 }
 
 private class Blizzard(input: List<String>) {
@@ -72,7 +72,7 @@ private class Blizzard(input: List<String>) {
         for (i in downs.indices) {
             downs[i] = when (downs[i].second + 1 < yMax) {
                 true -> Pair(downs[i].first, downs[i].second + 1)
-                false -> Pair(downs[i].first, yMax)
+                false -> Pair(downs[i].first, 1)
             }
         }
     }
@@ -86,10 +86,12 @@ private class Blizzard(input: List<String>) {
                 !walls.contains(position)
     }
 
-    fun print(position: Pair<Int, Int>, goal: Pair<Int, Int>) {
+    fun print(positions: Set<Pair<Int, Int>>, goal: Pair<Int, Int>) {
+
         for (y in 0..yMax) {
+            print("${y%10}")
             for (x in 0..xMax) {
-                if (Pair(x,y) == position) {
+                if (positions.contains(Pair(x,y))) {
                     print("E")
                 } else if (Pair(x,y) == goal) {
                     print('G')
@@ -134,6 +136,30 @@ private fun possiblePositions(position: Pair<Int, Int>, blizzard: Blizzard): Lis
     return result
 }
 
+private fun shortestPath(blizzard: Blizzard, start: Pair<Int, Int>, goal: Pair<Int, Int>): Int {
+    var steps = 0
+    var positions = mutableSetOf(start)
+    do {
+        blizzard.move()
+        val nextPositions = mutableSetOf<Pair<Int, Int>>()
+        for (position in positions) {
+            if (position == goal) {
+                break;
+            } else {
+                nextPositions.addAll(possiblePositions(position, blizzard))
+            }
+        }
+        steps++
+
+        positions = nextPositions
+        if (positions.contains(goal)) {
+            break
+        }
+    } while (positions.isNotEmpty())
+
+    return steps
+}
+
 private fun execute(input: List<String>): Int {
     val blizzard = Blizzard(input)
 
@@ -150,30 +176,28 @@ private fun execute(input: List<String>): Int {
         }
     }
 
-    var steps = 1
-    var positions = mutableSetOf(start)
-    do {
-        blizzard.move()
-        val nextPositions = mutableSetOf<Pair<Int, Int>>()
-        for (position in positions) {
-            if (position == goal) {
-                break;
-            } else {
-                nextPositions.addAll(possiblePositions(position, blizzard))
-            }
-        }
-        if (nextPositions.contains(goal)) {
-            break
-            println()
-        }
-
-        positions = nextPositions
-        steps++
-    } while (positions.isNotEmpty())
-
-    return steps
+    return shortestPath(blizzard, start, goal)
 }
 
 private fun execute2(input: List<String>): Int {
-    return 0
+    val blizzard = Blizzard(input)
+
+    var start = Pair(-1,-1)
+    var goal = Pair(-1,-1)
+    input[0].forEachIndexed{ x, ch ->
+        if (ch == '.') {
+            start = Pair(x, 0)
+        }
+    }
+    input.last().forEachIndexed { x, ch ->
+        if (ch == '.') {
+            goal = Pair(x, input.size - 1)
+        }
+    }
+
+    val firstTrip = shortestPath(blizzard, start, goal)
+    val tripBack = shortestPath(blizzard, goal, start)
+    val secondTrip = shortestPath(blizzard, start, goal)
+
+    return firstTrip + tripBack + secondTrip
 }
